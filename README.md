@@ -89,6 +89,14 @@ make build VERSION="$(cat VERSION)"
 
 Run the existing **Build and Release** workflow manually from the repository's Actions tab to build the CLI archives for the version in `VERSION`. Release assets use `HESARI-Wizard-<os>-<arch>` names. Installers also require a combined `SHA256SUMS` asset containing the SHA-256 hash of each archive.
 
+After the manual workflow finishes, generate and upload its combined checksum asset:
+
+```bash
+gh release download "$(cat VERSION)" --repo mjhesari/BPB-Wizard --pattern 'HESARI-Wizard-*' --dir dist
+npm run release:checksums
+gh release upload "$(cat VERSION)" dist/SHA256SUMS --repo mjhesari/BPB-Wizard --clobber
+```
+
 A complete test-and-tag-release workflow is provided in `scripts/github-test-and-release.yml`. To enable it, copy that file to `.github/workflows/build.yml` using GitHub credentials with the `workflow` scope. It runs the test suites, builds all platforms, and publishes the archives and checksums when a version tag is pushed. The active workflow is preserved because the publishing credential does not have that scope.
 
 ## Credits and license

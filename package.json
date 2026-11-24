@@ -32,6 +32,7 @@
     "deploy": "wrangler deploy",
     "test": "npm run build && node --test tests/*.test.mjs",
     "test:ui": "playwright test",
-    "preview": "node scripts/preview.mjs"
+    "preview": "node scripts/preview.mjs",
+    "release:checksums": "node scripts/checksums.mjs dist"
   }
 }
