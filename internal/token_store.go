@@ -20,22 +20,29 @@ type CfLogin struct {
 	Token string `json:"token"`
 }
 
-type tokenStore struct{}
+type tokenStore struct{ path string }
+
 func NewTokenStore() tokenStore {
-	return tokenStore{}
+	return tokenStore{path: tokenFilePath()}
 }
 
 func (s tokenStore) LoadLogins() (cfLoginStore, error) {
-	data, err := os.ReadFile(tokenFilePath())
-	if err != nil || os.IsNotExist(err) {
+	data, err := os.ReadFile(s.path)
+	if os.IsNotExist(err) {
 		return cfLoginStore{}, nil
+	}
+	if err != nil {
+		return cfLoginStore{}, err
 	}
 	if strings.TrimSpace(string(data)) == "" {
 		return cfLoginStore{}, nil
 	}
 
 	var store cfLoginStore
-	if err := json.Unmarshal(data, &store); err == nil && len(store.Logins) > 0 {
+	if err := json.Unmarshal(data, &store); err != nil {
+		return cfLoginStore{}, err
+	}
+	if len(store.Logins) > 0 {
 		return store, nil
 	}
 
@@ -73,7 +80,7 @@ func (s tokenStore) createStore(store cfLoginStore) error {
 		return err
 	}
 
-	path := tokenFilePath()
+	path := s.path
 	if err := os.MkdirAll(filepath.Dir(path), 0700); err != nil {
 		return err
 	}

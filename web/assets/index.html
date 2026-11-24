@@ -1,148 +1,94 @@
 <!doctype html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>BPB Wizard</title>
-    <link rel="icon" href="favicon.ico" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HESARI OS · Deployment workspace</title>
+    <meta name="description" content="Install your HESARI OS network workspace on Cloudflare Workers or Pages.">
+    <meta name="theme-color" content="#0B1120">
+    <meta name="referrer" content="no-referrer">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Ubuntu+Mono:ital,wght@0,400;0,700;1,400;1,700&family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap"
-        rel="stylesheet">
-    <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=alt_route,check_circle,cloud_upload,content_copy,key,keyboard_arrow_down,open_in_new,visibility,visibility_off" />
-    <link href="styles.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/styles.css">
+    <script src="/app.js" defer></script>
 </head>
-
 <body>
-    <div class="container">
-        <div class="card">
-            <div class="card-header-area">
-                <div class="card-header-group">
-                    <h3 class="header">
-                        <img src="favicon.ico" class="icon" />
-                        BPB Wizard
-                    </h3>
-                    <a href="https://github.com/bia-pain-bache/BPB-Wizard" target="_blank">
-                        <span>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="2rem" height="2rem" viewBox="0 0 24 24"
-                                fill="white">
-                                <path
-                                    d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
-                            </svg>
-                        </span>
-                    </a>
-                </div>
-                <p class="subtitle">Install BPB Panel efficiently</p>
-                <h4 id="user" style="display: none;"></h4>
-                <ol id="steps">
-                    <li>
-                        <a href="https://dash.cloudflare.com/sign-up" target="_blank" rel="noopener noreferrer">Sign
-                            up</a> a Cloudflare account and verify it.
-                    </li>
-                    <li>
-                        <a id="tokenTemplate" href="" target="_blank" rel="noopener noreferrer">Create a token</a>
-                        , you should <b>Continue to summary</b>, <b>Create Token</b> and copy it.
-                    </li>
-                    <li>Paste it here, choose installation method and install.</li>
-                    <li>After installation you get a <b>Private Link</b> which enables one-click installation.</li>
-                </ol>
-            </div>
-
-            <form id="deployForm" class="form">
-                <div id="apiTokenGroup" class="input-group">
-                    <span class="input-icon">
-                        <span class="material-symbols-rounded">
-                            key
-                        </span>
-                    </span>
-                    <input id="apiToken" name="apiToken" type="password" class="input-field"
-                        placeholder="Cloudflare API Token" required />
-                    <button id="togglePassword" type="button" class="input-after-icon">
-                        <span id="eyeIcon" class="material-symbols-rounded">
-                            visibility
-                        </span>
-                        <span id="eyeOffIcon" class="material-symbols-rounded hidden">
-                            visibility_off
-                        </span>
-                    </button>
-                </div>
-
-                <div class="input-group">
-                    <span class="material-symbols-rounded input-icon">
-                        alt_route
-                    </span>
-                    <select id="deployType" name="deployType" class="form-select">
-                        <option value="workers">Cloudflare Workers</option>
-                        <option value="pages">Cloudflare Pages</option>
-                    </select>
-                    <span class="material-symbols-rounded input-after-icon">
-                        keyboard_arrow_down
-                    </span>
-                </div>
-
-                <button type="submit" class="btn-primary">
-                    <span class="material-symbols-rounded">
-                        cloud_upload
-                    </span>
-                    Install
-                </button>
-
-                <div id="privateUrlToast" class="toast-card hidden">
-                    <div class="toast-header">
-                        <div class="toast-title">
-                            <span class="material-symbols-rounded toast-success-icon">
-                                check_circle
-                            </span>
-                            BPB Wizard private link
-                        </div>
-                        <button id="closePrivateUrlToast" class="toast-close-btn">
-                            ✕
-                        </button>
-                    </div>
-                    <div class="toast-body">
-                        Your private link to use wizard in one-click mode.
-                        <button id="copyURL" type="button" class="btn-secondary">
-                            <span class="material-symbols-rounded">
-                                content_copy
-                            </span>
-                        </button>
-                    </div>
-                </div>
-
-                <div id="deploymentToast" class="toast-card hidden">
-                    <div class="toast-header">
-                        <div class="toast-title">
-                            <span class="material-symbols-rounded toast-success-icon">
-                                check_circle
-                            </span>
-                            Successfully installed
-                        </div>
-                        <button id="closeDeploymentToast" class="toast-close-btn">
-                            ✕
-                        </button>
-                    </div>
-                    <div class="toast-body">
-                        Access your BPB Panel.
-                        <a id="liveUrl" href="#" target="_blank" class="toast-link">
-                            <span class="material-symbols-rounded">
-                                open_in_new
-                            </span>
-                        </a>
-                    </div>
-                </div>
-
-            </form>
-
-            <pre id="output" class="terminal">●●● Standby
-            </pre>
-
+    <a class="skip-link" href="#installation">Skip to installation</a>
+    <aside class="app-sidebar" aria-label="Workspace navigation">
+        <a class="sidebar-brand" href="#installation">
+            <img src="/favicon.svg" alt="" width="44" height="44">
+            <div><strong>HESARI OS</strong><small>PERSONAL COMMAND CENTER</small></div>
+        </a>
+        <p class="sidebar-label">WORKSPACE / DEPLOY</p>
+        <nav class="sidebar-nav">
+            <a href="#installation" aria-current="location"><svg aria-hidden="true"><use href="#icon-grid"/></svg>Installation</a>
+            <a href="#deployment-log"><svg aria-hidden="true"><use href="#icon-terminal"/></svg>Deployment log</a>
+            <a href="#command-line"><svg aria-hidden="true"><use href="#icon-code"/></svg>Command line</a>
+            <a href="https://github.com/mjhesari/Hesari-Os" target="_blank" rel="noopener noreferrer"><svg aria-hidden="true"><use href="#icon-layers"/></svg>HESARI OS</a>
+        </nav>
+        <div class="sidebar-bottom">
+            <a href="https://mj-hesari.ir" target="_blank" rel="noopener noreferrer">MJ Hesari</a>
+            <p>Build. Manage. Evolve.</p>
         </div>
-    </div>
-
-    <script src="app.js" defer></script>
+    </aside>
+    <main class="workspace">
+        <header class="workspace-header">
+            <div class="header-title">Deployment workspace <span class="panel-version">v3.1.0</span></div>
+            <div class="header-actions"><span class="header-context">HESARI / INFRASTRUCTURE</span><a href="https://github.com/mjhesari/BPB-Wizard" target="_blank" rel="noopener noreferrer">GitHub</a></div>
+        </header>
+        <section class="command-hero" aria-labelledby="workspace-heading">
+            <div><p class="eyebrow">YOUR WORKSPACE STARTS HERE</p><h1 id="workspace-heading">Build. Manage. Evolve.</h1><p>Bring your network workspace online. Install HESARI OS on your own Cloudflare account in a few simple steps.</p></div>
+            <div class="hero-emblem" aria-hidden="true"><img src="/favicon.svg" alt="" width="64" height="64"></div>
+        </section>
+        <div class="workspace-grid">
+            <section id="installation" class="card install-card" aria-labelledby="install-heading">
+                <div class="section-heading"><h2 id="install-heading"><svg aria-hidden="true"><use href="#icon-cloud"/></svg>Install your workspace</h2><span class="tag">CLOUDFLARE</span></div>
+                <p class="section-note">Your account. Your infrastructure. Your control.</p>
+                <div class="setup-guide" id="steps">
+                    <p><span class="step-mark" aria-hidden="true">1</span><span><a href="https://dash.cloudflare.com/sign-up" target="_blank" rel="noopener noreferrer">Create a Cloudflare account</a> and verify your email.</span></p>
+                    <p><span class="step-mark" aria-hidden="true">2</span><span><a id="tokenTemplate" href="https://dash.cloudflare.com/profile/api-tokens" target="_blank" rel="noopener noreferrer">Create an API token</a> using our permission template.</span></p>
+                    <p><span class="step-mark" aria-hidden="true">3</span><span>Paste your token, choose a destination, and install.</span></p>
+                </div>
+                <div id="accountBanner" class="account-banner" hidden><svg aria-hidden="true"><use href="#icon-check"/></svg><div><strong>Account connected</strong><span id="user"></span></div><button type="button" id="changeAccount" class="text-button">Change</button></div>
+                <form id="deployForm">
+                    <div id="apiTokenGroup" class="form-control">
+                        <label for="apiToken">Cloudflare API token</label>
+                        <div class="input-wrapper"><input id="apiToken" name="apiToken" type="password" autocomplete="off" spellcheck="false" placeholder="Paste your API token" required aria-describedby="tokenHint"><button id="togglePassword" class="icon-button" type="button" aria-label="Show token" aria-pressed="false"><svg aria-hidden="true"><use href="#icon-eye"/></svg></button></div>
+                        <p id="tokenHint" class="field-hint">Choose “Continue to summary”, then “Create Token” in Cloudflare.</p>
+                    </div>
+                    <fieldset class="destination-group"><legend>Deployment destination</legend><div class="destination-options">
+                        <label class="destination"><input type="radio" name="deployType" value="workers" checked><svg aria-hidden="true"><use href="#icon-cloud"/></svg><span><strong>Workers</strong><small>workers.dev</small></span><span class="radio-mark" aria-hidden="true"></span></label>
+                        <label class="destination"><input type="radio" name="deployType" value="pages"><svg aria-hidden="true"><use href="#icon-layers"/></svg><span><strong>Pages</strong><small>pages.dev</small></span><span class="radio-mark" aria-hidden="true"></span></label>
+                    </div></fieldset>
+                    <p id="formError" class="form-error" role="alert" hidden></p>
+                    <button id="installButton" type="submit" class="button primary-button"><svg aria-hidden="true"><use href="#icon-cloud"/></svg><span id="installLabel">Install HESARI OS</span></button>
+                    <p class="form-note">Creates a new workspace with its own storage and private panel URL.</p>
+                </form>
+            </section>
+            <section id="deployment-log" class="card log-card" aria-labelledby="log-heading">
+                <div class="section-heading"><h2 id="log-heading"><svg aria-hidden="true"><use href="#icon-terminal"/></svg>Deployment log</h2><span id="deploymentStatus" class="status" data-state="idle">Ready</span></div>
+                <p class="section-note">Follow your installation as it happens.</p>
+                <div id="output" class="terminal" role="log" aria-label="Installation progress" aria-live="polite" aria-relevant="additions text"><div class="log-entry terminal-muted"><span aria-hidden="true">›</span><span>Waiting for your installation.</span></div><div class="log-entry terminal-muted"><span aria-hidden="true">›</span><span>Deployment events will appear here.</span></div></div>
+                <div class="log-footer"><span id="destinationLabel">DESTINATION / WORKERS</span><span>HESARI OS WIZARD</span></div>
+                <div id="deploymentResult" class="result-card" role="status" hidden><div class="result-heading"><svg aria-hidden="true"><use href="#icon-check"/></svg><strong>Your workspace is ready.</strong></div><p>Open your panel to finish setting up HESARI OS.</p><a id="liveUrl" class="button primary-button" target="_blank" rel="noopener noreferrer">Open HESARI OS</a><button id="copyPanelURL" type="button" class="button secondary-button"><svg aria-hidden="true"><use href="#icon-copy"/></svg><span>Copy panel link</span></button></div>
+                <div id="privateLinkCard" class="private-link-card" hidden><strong>Make your next install simpler.</strong><p>Save your private installer link to reuse this account. Anyone with this link can install using your token; keep it private.</p><button id="copyURL" type="button" class="text-button"><svg aria-hidden="true"><use href="#icon-copy"/></svg><span>Copy private installer link</span></button></div>
+            </section>
+            <section id="command-line" class="card cli-card" aria-labelledby="cli-heading"><div><h2 id="cli-heading"><svg aria-hidden="true"><use href="#icon-code"/></svg>Prefer the command line?</h2><p class="section-note">The same workspace, installed from your terminal. Supports multiple Cloudflare logins.</p></div><div class="cli-controls"><div class="platform-tabs" role="tablist" aria-label="Operating system"><button id="unixTab" role="tab" type="button" aria-selected="true" aria-controls="unixPanel">macOS / Linux / Termux</button><button id="windowsTab" role="tab" type="button" aria-selected="false" aria-controls="windowsPanel" tabindex="-1">Windows</button></div><div id="unixPanel" class="command-box" role="tabpanel" aria-labelledby="unixTab"><code id="unixCommand">bash &lt;(curl -fsSL https://raw.githubusercontent.com/mjhesari/BPB-Wizard/main/install.sh)</code><button type="button" class="icon-button copy-command" data-command="unixCommand" aria-label="Copy macOS, Linux and Termux command"><svg aria-hidden="true"><use href="#icon-copy"/></svg></button></div><div id="windowsPanel" class="command-box" role="tabpanel" aria-labelledby="windowsTab" hidden><code id="windowsCommand">irm https://raw.githubusercontent.com/mjhesari/BPB-Wizard/main/install.ps1 | iex</code><button type="button" class="icon-button copy-command" data-command="windowsCommand" aria-label="Copy Windows command"><svg aria-hidden="true"><use href="#icon-copy"/></svg></button></div></div></section>
+        </div>
+        <footer class="brand-footer"><p>HESARI OS · Build. Manage. Evolve.</p><p>By <a href="https://mj-hesari.ir" target="_blank" rel="noopener noreferrer">MJ Hesari</a> · Network engine based on <a href="https://github.com/bia-pain-bache/BPB-Worker-Panel" target="_blank" rel="noopener noreferrer">BPB Panel</a> · GPL-3.0</p></footer>
+    </main>
+    <div id="clipboardStatus" class="clipboard-status" role="status" hidden></div>
+    <svg class="icon-definitions" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>
+        <symbol id="icon-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></symbol>
+        <symbol id="icon-cloud" viewBox="0 0 24 24"><path d="M7 18a5 5 0 1 1 0-10 6 6 0 0 1 11.5 1.5A4.3 4.3 0 0 1 18 18M12 21V11m-4 4 4-4 4 4"/></symbol>
+        <symbol id="icon-terminal" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="m7 9 3 3-3 3m6 0h4"/></symbol>
+        <symbol id="icon-code" viewBox="0 0 24 24"><path d="m7 7-5 5 5 5m10-10 5 5-5 5M14 4l-4 16"/></symbol>
+        <symbol id="icon-layers" viewBox="0 0 24 24"><path d="m12 3 10 6-10 6L2 9l10-6ZM2 15l10 6 10-6M2 12l10 6 10-6"/></symbol>
+        <symbol id="icon-eye" viewBox="0 0 24 24"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></symbol>
+        <symbol id="icon-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></symbol>
+        <symbol id="icon-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="13" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/></symbol>
+    </defs></svg>
 </body>
-
 </html>

@@ -1,22 +1,27 @@
 package internal
 
 import (
+	crand "crypto/rand"
 	"fmt"
-	mrand "math/rand"
+	"math/big"
 	"strings"
 )
 
 func randInt(min, max int) int {
-	return mrand.Intn(max-min+1) + min
+	value, err := crand.Int(crand.Reader, big.NewInt(int64(max-min+1)))
+	if err != nil {
+		panic("Secure randomness is unavailable")
+	}
+	return int(value.Int64()) + min
 }
 
 func randString(charset string, minLen, maxLen int) string {
-	length := minLen + mrand.Intn(maxLen-minLen+1)
+	length := randInt(minLen, maxLen)
 	bytes := make([]byte, length)
 	for i := range bytes {
-		bytes[i] = charset[mrand.Intn(len(charset))]
+		bytes[i] = charset[randInt(0, len(charset)-1)]
 	}
-	
+
 	return string(bytes)
 }
 
@@ -39,14 +44,14 @@ func randCode() string {
 
 	var varsBuilder strings.Builder
 	for i := range varCount {
-		varName := fmt.Sprintf("__var_%s_%d", randString(charset, 8,16), i)
+		varName := fmt.Sprintf("__var_%s_%d", randString(charset, 8, 16), i)
 		value := randInt(0, 99999)
 		varsBuilder.WriteString(fmt.Sprintf("let %s = %d;\n", varName, value))
 	}
 
 	var funcsBuilder strings.Builder
 	for i := range funcCount {
-		funcName := fmt.Sprintf("__func_%s_%d", randString(charset, 8,16), i)
+		funcName := fmt.Sprintf("__func_%s_%d", randString(charset, 8, 16), i)
 		value := randInt(0, 999)
 		fmt.Fprintf(&funcsBuilder, "function %s() { return %d; }\n", funcName, value)
 	}

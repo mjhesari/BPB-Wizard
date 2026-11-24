@@ -21,7 +21,7 @@ type Color struct {
 var (
 	ColorRed   = Color{224, 40, 40}
 	ColorGreen = Color{40, 180, 70}
-	ColorBlue  = Color{96, 165, 250}
+	ColorBlue  = Color{20, 184, 166}
 )
 
 var isTermux = false
@@ -126,7 +126,18 @@ func PromptWizard(logger *Logger) bool {
 	}
 }
 
-func PromptLogin(logger *Logger, total int) int {
+func parseLoginChoice(value string, total, activeIndex int) (int, error) {
+	if value == "" {
+		return activeIndex, nil
+	}
+	number, err := strconv.Atoi(value)
+	if err != nil || number < 0 || number > total {
+		return 0, fmt.Errorf("Choose an account number from 0 to %d", total)
+	}
+	return number, nil
+}
+
+func PromptLogin(logger *Logger, total, activeIndex int) int {
 	reader := bufio.NewReader(os.Stdin)
 	for {
 		fmt.Println()
@@ -136,17 +147,9 @@ func PromptLogin(logger *Logger, total int) int {
 			logger.Fatal(err)
 		}
 		resp := strings.TrimSpace(line)
-		if resp == "" {
-			return 1
-		}
-
-		number, err := strconv.Atoi(resp)
+		number, err := parseLoginChoice(resp, total, activeIndex)
 		if err != nil {
-			logger.Fatal(err)
-		}
-
-		if number > total {
-			logger.Error("Out of range, try again...")
+			logger.Error(err.Error())
 			continue
 		}
 
@@ -266,7 +269,7 @@ func BuildTokenURL() (string, error) {
 	q.Set("permissionGroupKeys", string(permissionJSON))
 	q.Set("accountId", "*")
 	q.Set("zoneId", "all")
-	q.Set("name", "BPB-Wizard")
+	q.Set("name", "HESARI-OS-Wizard")
 	u.RawQuery = q.Encode()
 
 	return u.String(), nil

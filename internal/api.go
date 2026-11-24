@@ -2,6 +2,7 @@ package internal
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"net"
@@ -80,13 +81,19 @@ func CreateCfAccount(ctx context.Context, token string) (*CfAccount, error) {
 	acc := NewCfAccount(token)
 
 	tokenRes, err := acc.Client.User.Tokens.Verify(ctx)
-	if err != nil || tokenRes.Status != "active" {
+	if err != nil {
 		return nil, err
+	}
+	if tokenRes.Status != "active" {
+		return nil, fmt.Errorf("Cloudflare API token is not active")
 	}
 
 	accountsRes, err := acc.Client.Accounts.List(ctx, accounts.AccountListParams{})
 	if err != nil {
 		return nil, err
+	}
+	if len(accountsRes.Result) == 0 {
+		return nil, fmt.Errorf("No Cloudflare account is available for this token")
 	}
 	acc.ID = accountsRes.Result[0].ID
 
@@ -99,7 +106,7 @@ func CreateCfAccount(ctx context.Context, token string) (*CfAccount, error) {
 	return acc, nil
 }
 
-func (acc *CfAccount) NameTaken(ctx context.Context, deployType, name string) bool {
+func (acc *CfAccount) NameTaken(ctx context.Context, deployType, name string) (bool, error) {
 	var err error
 	if deployType == "pages" {
 		_, err = acc.Client.Pages.Projects.Get(
@@ -109,7 +116,7 @@ func (acc *CfAccount) NameTaken(ctx context.Context, deployType, name string) bo
 				AccountID: cloudflare.F(acc.ID),
 			},
 		)
-		return err == nil
+		return resourceExists(err)
 	}
 
 	_, err = acc.Client.Workers.Scripts.Get(
@@ -120,7 +127,18 @@ func (acc *CfAccount) NameTaken(ctx context.Context, deployType, name string) bo
 		},
 	)
 
-	return err == nil
+	return resourceExists(err)
+}
+
+func resourceExists(err error) (bool, error) {
+	if err == nil {
+		return true, nil
+	}
+	var apiErr *cloudflare.Error
+	if errors.As(err, &apiErr) && apiErr.StatusCode == 404 {
+		return false, nil
+	}
+	return false, err
 }
 
 func (acc *CfAccount) CreateKVNamespace(ctx context.Context, workerName string, deployType string) (string, error) {
@@ -164,7 +182,7 @@ func (acc *CfAccount) CreateWorkersDevSubdomain(ctx context.Context) (string, er
 			return res.Subdomain + ".workers.dev", nil
 		}
 	}
-	
+
 	return "", fmt.Errorf("Failed to create a unique workers.dev subdomain after %d attempts.", maxAttempts)
 }
 

@@ -48,6 +48,10 @@ func buildScript(acc *CfAccount, workerName, subdomain string) (io.Reader, *Embe
 		return nil, nil, err
 	}
 
+	return renderScript(raw, acc, workerName, subdomain)
+}
+
+func renderScript(raw string, acc *CfAccount, workerName, subdomain string) (io.Reader, *EmbeddedSettings, error) {
 	vlUUID := uuid.NewString()
 	const passCharset = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@$&*_-+;:,."
 	trPass := randString(passCharset, 16, 32)
@@ -84,6 +88,6 @@ func buildScript(acc *CfAccount, workerName, subdomain string) (io.Reader, *Embe
 		raw,
 	)
 	var reader io.Reader = strings.NewReader(script)
-	
+
 	return reader, settings, nil
 }

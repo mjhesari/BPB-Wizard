@@ -32,19 +32,14 @@ func main() {
 	}()
 
 	if val, ok := os.LookupEnv("LAUNCHED_BY_SCRIPT"); !ok || val != "1" {
-		fmt.Println("BPB Wizard can not be executed standalone.")
+		fmt.Println("HESARI OS Wizard can not be executed standalone.")
 		os.Exit(1)
 	}
 
 	logger := internal.NewLogger()
 	internal.ConfigTermux(logger)
 
-	header := fmt.Sprintf(`
- _____ _____ _____ 
-| __  |  _  | __  |
-| __ -|   __| __ -|
-|_____|__|  |_____| Wizard CLI %s
-`, VERSION)
+	header := fmt.Sprintf("\n  HESARI OS / WIZARD %s\n  Build. Manage. Evolve.\n\n", VERSION)
 	fmt.Print(internal.FmtStr(header, internal.ColorBlue, true))
 
 	for {
@@ -58,11 +53,13 @@ func main() {
 		var acc *internal.CfAccount
 		if noStore {
 			acc = internal.CreateAccount(ctx, logger)
-			tokenStore.SaveLogin(internal.CfLogin{
+			if err := tokenStore.SaveLogin(internal.CfLogin{
 				Email: acc.Email,
 				ID:    acc.ID,
 				Token: acc.Token,
-			})
+			}); err != nil {
+				logger.Fatal(err)
+			}
 		} else {
 			fmt.Println()
 			for index, account := range store.Logins {
@@ -76,18 +73,29 @@ func main() {
 			}
 			fmt.Printf("  %s Add a new token\n", internal.FmtStr("0.", internal.ColorBlue, true))
 
-			index := internal.PromptLogin(logger, len(store.Logins))
+			activeIndex := 1
+			for i, login := range store.Logins {
+				if login.Email == store.ActiveEmail {
+					activeIndex = i + 1
+				}
+			}
+			index := internal.PromptLogin(logger, len(store.Logins), activeIndex)
 			if index == 0 {
 				acc = internal.CreateAccount(ctx, logger)
-				tokenStore.SaveLogin(internal.CfLogin{
+				if err := tokenStore.SaveLogin(internal.CfLogin{
 					Email: acc.Email,
 					ID:    acc.ID,
 					Token: acc.Token,
-				})
+				}); err != nil {
+					logger.Fatal(err)
+				}
 			} else {
 				acc = internal.NewCfAccount(store.Logins[index-1].Token)
 				acc.ID = store.Logins[index-1].ID
 				acc.Email = store.Logins[index-1].Email
+				if err := tokenStore.SaveLogin(store.Logins[index-1]); err != nil {
+					logger.Fatal(err)
+				}
 			}
 		}
 
@@ -95,7 +103,10 @@ func main() {
 		var workerName string
 		for {
 			subdomain := internal.PromptSubdomain(logger)
-			taken := acc.NameTaken(ctx, deployType, subdomain)
+			taken, err := acc.NameTaken(ctx, deployType, subdomain)
+			if err != nil {
+				logger.Fatal(err)
+			}
 			if taken {
 				logger.Error("This subdomain is taken, try again...")
 				continue
@@ -106,7 +117,7 @@ func main() {
 		}
 
 		fmt.Println()
-		logger.Info("Installing BPB Panel...")
+		logger.Info("Installing HESARI OS...")
 		namespaceID, err := acc.CreateKVNamespace(ctx, workerName, deployType)
 		if err != nil {
 			logger.Fatal(err)
@@ -120,7 +131,7 @@ func main() {
 			panelURL = internal.DeployToWorkers(ctx, acc, logger, workerName, namespaceID)
 		}
 
-		logger.Success("BPB Panel successfully installed!")
+		logger.Success("HESARI OS successfully installed!")
 		fmt.Println()
 		logger.Info("Panel URL: " + internal.FmtStr(panelURL, internal.ColorBlue, true))
 

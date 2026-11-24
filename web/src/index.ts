@@ -1,12 +1,12 @@
 import { CFAccount } from "./api";
-import { decrypt, encrypt } from "./encryption";
+import { decrypt, encrypt, validateSecret } from "./encryption";
 import { randSubdomain } from "./random";
 import { buildScript } from "./script";
 import { createStreamLogger, StreamLogger } from "./logger";
 
-interface Env {
+export interface Env {
     SECRET: string;
-    ASSETS: any;
+    ASSETS: { fetch: (request: Request | URL) => Promise<Response> };
 }
 
 export default {
@@ -26,9 +26,13 @@ export default {
                 try {
                     const key = url.searchParams.get('key');
                     const preRelease = url.searchParams.get('pre-release') === 'true';
+                    validateSecret(env.SECRET);
                     const formData = await request.formData();
-                    const apiToken = key ? await decrypt(key, env.SECRET) : formData.get('apiToken')?.toString().trim() ?? '';
+                    const privateKey = formData.get('privateKey')?.toString() || key;
+                    const apiToken = privateKey ? await decrypt(privateKey, env.SECRET) : formData.get('apiToken')?.toString().trim() ?? '';
                     const deployType = formData.get('deployType')?.toString() || 'workers';
+                    if (!apiToken) throw new Error('Enter a Cloudflare API token.');
+                    if (!['workers', 'pages'].includes(deployType)) throw new Error('Choose Workers or Pages.');
                     const account = await CFAccount.create(apiToken);
 
                     let workerName: string;
@@ -36,7 +40,7 @@ export default {
                         workerName = randSubdomain();
                     } while (await account.nameTaken(deployType, workerName));
 
-                    info('Installing BPB Panel...');
+                    info('Installing HESARI OS...');
                     const namespaceId = await account.createKvNamespace(workerName, deployType);
                     success('KV namespace created successfully!');
 
@@ -46,7 +50,8 @@ export default {
                         await deployWorkers(env, account, workerName, namespaceId, logger, preRelease);
                     }
                 } catch (err) {
-                    error(`Failed to install BPB Panel: ${err}`);
+                    const message = err instanceof Error ? err.message : 'Unexpected installation error.';
+                    error(`Could not install HESARI OS: ${message}`);
                 } finally {
                     close();
                 }
@@ -54,13 +59,19 @@ export default {
 
             return new Response(readable, {
                 headers: {
-                    'Content-Type': 'application/x-ndjson'
+                    'Content-Type': 'application/x-ndjson',
+                    'Cache-Control': 'no-store',
+                    'X-Content-Type-Options': 'nosniff'
                 }
             });
         }
 
         if (url.pathname === '/') {
-            return env.ASSETS.fetch(new URL('/index.html', request.url));
+            const response = await env.ASSETS.fetch(new URL('/index.html', request.url));
+            const headers = new Headers(response.headers);
+            headers.set('Referrer-Policy', 'no-referrer');
+            headers.set('Cache-Control', 'no-store');
+            return new Response(response.body, { status: response.status, headers });
         }
 
         return env.ASSETS.fetch(request);

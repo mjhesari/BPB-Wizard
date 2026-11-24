@@ -18,7 +18,7 @@ func (l *Logger) Info(msg string) {
 }
 
 func (l *Logger) Success(msg string) {
-	
+
 	fmt.Printf("%s %s\n", FmtStr("✓", ColorGreen, true), msg)
 }
 
@@ -27,7 +27,7 @@ func (l *Logger) Error(msg string) {
 }
 
 func (l *Logger) Fatal(err error) {
-	msg := fmt.Sprintf("Failed to install BPB Panel: %s", err.Error())
+	msg := fmt.Sprintf("Failed to install HESARI OS: %s", err.Error())
 	l.Error(msg)
 	os.Exit(1)
 }

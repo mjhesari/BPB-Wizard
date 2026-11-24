@@ -2,6 +2,7 @@ const encoder = new TextEncoder();
 const decoder = new TextDecoder();
 
 async function importKey(secret: string): Promise<CryptoKey> {
+    validateSecret(secret);
     const hash = await crypto.subtle.digest(
         'SHA-256',
         encoder.encode(secret)
@@ -14,6 +15,12 @@ async function importKey(secret: string): Promise<CryptoKey> {
         false,
         ['encrypt', 'decrypt']
     );
+}
+
+export function validateSecret(secret: string): void {
+    if (typeof secret !== 'string' || secret.length < 32) {
+        throw new Error('Wizard is not configured. Set a random SECRET of at least 32 characters before installing.');
+    }
 }
 
 export async function encrypt(text: string, secret: string): Promise<string> {
@@ -47,6 +54,6 @@ export async function decrypt(encrypted: string, secret: string): Promise<string
 
         return decoder.decode(decrypted);
     } catch (error) {
-        throw new Error('Wizard API token had been changed since v5.1.0, Please go to wizard main page and create a new token.\n');
+        throw new Error('This private link is invalid or has expired. Open the Wizard without the link and enter your Cloudflare token again.');
     }
 }

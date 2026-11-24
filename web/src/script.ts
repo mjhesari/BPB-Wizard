@@ -1,6 +1,7 @@
 import { toFile, Uploadable } from "cloudflare";
 import { CFAccount } from "./api";
 import { randCode, randString } from "./random";
+import { panelWorkerURL } from './config';
 
 interface Script {
     script: Uploadable;
@@ -17,20 +18,11 @@ export async function buildScript(
     const pathCharset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456780-_';
     const passCharset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@$&*_-+;:,.';
 
-    let url = 'https://github.com/bia-pain-bache/BPB-Worker-Panel/releases/latest/download/worker.js';
-    if (preRelease) {
-        const res = await fetch('https://raw.githubusercontent.com/bia-pain-bache/BPB-Worker-Panel/refs/heads/dev/package.json');
-        if(!res.ok) {
-            throw new Error(`Failed to get pre-release script: status ${res.status} at ${res.url}`);
-        }
-
-        const { version } = await res.json() as any;
-        url = `https://github.com/bia-pain-bache/BPB-Worker-Panel/releases/download/v${version}/worker.js`;
-    }
+    const url = await panelWorkerURL(preRelease);
 
     const res = await fetch(url);
     if (!res.ok) {
-        throw new Error(`Failed to get panel script: status ${res.status} at ${res.url}`)
+        throw new Error(`Could not download HESARI OS (HTTP ${res.status}).`)
     }
 
     const script = await res.text();
